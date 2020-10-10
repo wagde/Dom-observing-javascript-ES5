@@ -1,6 +1,6 @@
 function UrCapture() {
     var watchForAddedElementsArgs = [];
-    var watchForRemovedElementsSelectors = "selectors";
+    var watchForRemovedElementsSelectors = "selectorsHereRemovedElements";
     var isObserverActive = false;
     function initObserver() {
         isObserverActive = true;
