@@ -1,42 +1,27 @@
-var urCapture = {
-    isObserverActive: false,
-    watchForAddedElementsArgs: [],
-    watchForRemovedElementsSelectors: "selectors",
-    initObserver: function () {
-        this.isObserverActive = true;
+function UrCapture() {
+    var watchForAddedElementsArgs = [];
+    var watchForRemovedElementsSelectors = "selectors";
+    var isObserverActive = false;
+    function initObserver() {
+        isObserverActive = true;
         var callbackObserver = function (mutationsList) {
             mutationsList.forEach(function (list) {
                 var removedNodes = list["removedNodes"][0];
                 var addedNodes = list["addedNodes"][0];
-                removedNodes && this.checkRemovedNodes(removedNodes);
-                addedNodes && this.watchForAddedElementsArgs.length && this.checkAddedNodes(addedNodes);
-            }.bind(this))
-        }
-        new MutationObserver(callbackObserver.bind(this)).observe(document, { childList: true, subtree: true });
-    },
-
-    watchForAddedElements: function (selectors, callback) {
-        if (typeof selectors === "string" && typeof callback === "function") {
-            this.watchForAddedElementsArgs.push({ "selectors": selectors, "callback": callback })
-            if (!this.isObserverActive) this.initObserver();
-        }
-    },
-    watchForRemovedElements: function (selectors, callback) {
-        if (typeof selectors === "string" && typeof callback === "function") {
-            this.watchForRemovedElementsSelectors += "," + selectors;
-            if (!this.isObserverActive) this.initObserver();
-            //node list
-            var allElements = document.querySelectorAll(selectors);
-            Array.prototype.slice.call(allElements).forEach(function (ele) {
-                ele["watchForRemovedElements"] = callback;
+                removedNodes && checkRemovedNodes(removedNodes);
+                addedNodes && watchForAddedElementsArgs.length && checkAddedNodes(addedNodes);
             })
         }
+        new MutationObserver(callbackObserver).observe(document, { childList: true, subtree: true });
     }
-    ,
-    checkRemovedNodes: function (removedNodes) {
+
+
+  
+
+
+    function checkRemovedNodes(removedNodes) {
         if (removedNodes.nodeType === 1) {
-            var watchForRemovedElementsArgsSelectors = this['watchForRemovedElementsSelectors'];
-            var elemnts = removedNodes.querySelectorAll(watchForRemovedElementsArgsSelectors);
+            var elemnts = removedNodes.querySelectorAll(watchForRemovedElementsSelectors);
             /// if the element it self has been deleted
             if (typeof removedNodes["watchForRemovedElements"] === "function") {
                 removedNodes["watchForRemovedElements"]();
@@ -49,11 +34,11 @@ var urCapture = {
             }
         }
 
-    },
+    }
 
-    checkAddedNodes: function (addedNodes) {
+    function checkAddedNodes(addedNodes) {
         if (addedNodes.nodeType === 1) {
-            this.watchForAddedElementsArgs.forEach(function (args) {
+            watchForAddedElementsArgs.forEach(function (args) {
                 var selectors = args['selectors'];
                 var callback = args['callback'];
                 var childNodes = addedNodes.querySelectorAll(selectors);
@@ -74,4 +59,28 @@ var urCapture = {
             })
         }
     }
+
+
+    this.watchForAddedElements = function (selectors, callback) {
+        if (typeof selectors === "string" && typeof callback === "function") {
+            watchForAddedElementsArgs.push({ "selectors": selectors, "callback": callback })
+            if (!isObserverActive) initObserver();
+        }
+    }
+
+    this.watchForRemovedElements = function (selectors, callback) {
+        if (typeof selectors === "string" && typeof callback === "function") {
+            watchForRemovedElementsSelectors += "," + selectors;
+            if (!isObserverActive) initObserver();
+            //node list
+            var allElements = document.querySelectorAll(selectors);
+            Array.prototype.slice.call(allElements).forEach(function (ele) {
+                ele["watchForRemovedElements"] = callback;
+            })
+        }
+    }
+
 }
+
+
+var urCapture = new UrCapture()
